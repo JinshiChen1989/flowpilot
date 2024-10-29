@@ -252,9 +252,9 @@ class CarController:
             if len(self.lead_distance_distavg) >= DISTSPEED_AVERAGING:
               use_basic_speedadj = False
               # average the model and distspeed values
-              avg_speeds = lead_vdiff_mph * 0.7 + clamp(statistics.fmean(self.lead_distance_distavg), min_allowed, max_allowed) * 0.3
+              avg_speeds = lead_vdiff_mph * 0.6 + clamp(statistics.fmean(self.lead_distance_distavg), min_allowed, max_allowed) * 0.4
               # use model speed more if there is poor distance confidence
-              lead_vdiff_mph = interp(l0dstd, [3.0, 6.0], [avg_speeds, lead_vdiff_mph])
+              lead_vdiff_mph = interp(l0dstd, [3.0, 7.0], [avg_speeds, lead_vdiff_mph])
               self.lead_distance_distavg.pop(0)
     else:
       # no lead, clear data
