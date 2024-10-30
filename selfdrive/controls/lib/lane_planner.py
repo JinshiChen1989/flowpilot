@@ -18,7 +18,7 @@ TYPICAL_MIN_LANE_DISTANCE = 2.7
 TYPICAL_MAX_LANE_DISTANCE = 3.4
 CENTER_FORCE_GENERAL_SCALE = 0.5
 # higher offset means steering more right
-DESIRED_CURVE_OFFSET = 0.058
+DESIRED_CURVE_OFFSET = 0.057
 DESIRED_CURVE_TO_STEERANGLE_RATIO = -0.04
 # overall desire curve steer scale, set to 0 to disable using desired_curvature
 STEER_DISAGREEMENT_SCALE = 0.077
@@ -209,7 +209,7 @@ class LanePlanner:
       # apply less lane centering for a direction we are already turning
       # this helps avoid overturning in an existing turn
       if math.copysign(1, self.center_force) == math.copysign(1, vcurv[0]):
-        self.center_force *= 0.6
+        self.center_force *= 0.7
       # if we are lane changing, cut center force
       self.center_force *= self.lane_change_multiplier
 
@@ -240,7 +240,7 @@ class LanePlanner:
         ultimate_path_mix = lane_trust * interp(max_lane_width_seen, [4.0, 6.0], [1.0, 0.0])
 
       # max out at 50% model/lane system
-      final_ultimate_path_mix = clamp(self.lane_change_multiplier * ultimate_path_mix, 0.0, 0.9)
+      final_ultimate_path_mix = clamp(self.lane_change_multiplier * ultimate_path_mix, 0.0, 0.8)
 
       # now that we have steer_disagreement as a solid guide, we don't always need to rely on center_force
       # so, scale back center_force if we are not very confident in our lane lines
