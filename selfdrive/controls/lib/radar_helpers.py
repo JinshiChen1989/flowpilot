@@ -178,10 +178,10 @@ class Cluster():
         Dists.pop(0)
         dStds.pop(0)
       # how much lead car values do we want to average?
-      finald = np.average(reject_outliers(Dists))
-      finalv = np.average(reject_outliers(vLeads))
-      finals = np.average(reject_outliers(Stds))
-      finaldu = np.average(reject_outliers(dStds))
+      finald = np.average(Dists)
+      finalv = np.average(vLeads)
+      finals = np.average(Stds)
+      finaldu = np.average(dStds)
       finalvego = np.average(vEgos)
       # only consider we've got a lead when we've collected some data on it
       if len(vLeads) >= LEAD_DATA_COUNT_BEFORE_VALID:
