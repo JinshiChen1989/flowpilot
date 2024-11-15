@@ -17,6 +17,7 @@ MAX_LANE_DISTANCE = 3.7
 TYPICAL_MIN_LANE_DISTANCE = 2.7
 TYPICAL_MAX_LANE_DISTANCE = 3.4
 CENTER_FORCE_GENERAL_SCALE = 0.5
+KEEP_FROM_EDGE = 1.3
 # higher offset means steering more right
 DESIRED_CURVE_OFFSET = 0.0
 DESIRED_CURVE_TO_STEERANGLE_RATIO = -0.037
@@ -231,6 +232,8 @@ class LanePlanner:
         ideal_right = right_anchor - final_lane_width * 0.5
         # merge them to get an ideal center point, based on which value we want to prefer
         ideal_point = lerp(ideal_left, ideal_right, r_prob)
+        # make sure we are clamped within the road edges tho
+        ideal_point = clamp(ideal_point, self.le_y[index] + KEEP_FROM_EDGE, self.re_y[index] - KEEP_FROM_EDGE)
         # add it to our ultimate path
         self.ultimate_path[index] = ideal_point
 
