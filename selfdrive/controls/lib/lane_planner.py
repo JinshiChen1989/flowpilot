@@ -18,6 +18,9 @@ TYPICAL_MIN_LANE_DISTANCE = 2.7
 TYPICAL_MAX_LANE_DISTANCE = 3.4
 CENTER_FORCE_GENERAL_SCALE = 0.5
 KEEP_FROM_EDGE = 1.3
+# these offsets only apply with certain lane changes
+LEFT_LANE_CHANGE_OFFSET = 0.2
+RIGHT_LANE_CHANGE_OFFSET = 0.0
 # higher offset means steering more right
 DESIRED_CURVE_OFFSET = 0.0
 DESIRED_CURVE_TO_STEERANGLE_RATIO = -0.037
@@ -260,6 +263,7 @@ class LanePlanner:
       sLogger.Send("Lanes lost completely! Using model path entirely...")
 
     # apply camera offset and centering force after everything
-    path_xyz[:, 1] += CAMERA_OFFSET + self.center_force + steer_disagreement
+    # also apply lane changing offsets, if any
+    path_xyz[:, 1] += CAMERA_OFFSET + self.center_force + steer_disagreement + LEFT_LANE_CHANGE_OFFSET * self.l_lane_change_prob + RIGHT_LANE_CHANGE_OFFSET * self.r_lane_change_prob
 
     return path_xyz
