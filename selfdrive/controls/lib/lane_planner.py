@@ -190,6 +190,9 @@ class LanePlanner:
       current_lane_width = clamp(raw_current_width, MIN_LANE_DISTANCE, MAX_LANE_DISTANCE)
       self.lane_width_estimate.update(current_lane_width)
       speed_lane_width = interp(v_ego, [0., 31.], [TYPICAL_MIN_LANE_DISTANCE, TYPICAL_MAX_LANE_DISTANCE])
+      # when estimating speed lane width, make sure not to go wider than lane <-> road edge width
+      speed_lane_width = min(speed_lane_width, abs(self.lll_y[0] - self.re_y[0])) 
+      speed_lane_width = min(speed_lane_width, abs(self.rll_y[0] - self.le_y[0]))
       self.lane_width = lerp(speed_lane_width, self.lane_width_estimate.x, width_trust)
       lane_tightness = min(raw_current_width, self.lane_width_estimate.x)
 
