@@ -206,7 +206,7 @@ class LanePlanner:
       # ok, how far off of center are we, considering we want to be closer to edges of the road?
       target_centering = rightBorder + leftBorder
       # fancy smooth increasing centering force based on lane width
-      self.center_force = CENTER_FORCE_GENERAL_SCALE * (TYPICAL_MAX_LANE_DISTANCE / self.lane_width) * target_centering
+      self.center_force = CENTER_FORCE_GENERAL_SCALE * target_centering
       # apply a cap centering force
       self.center_force = clamp(self.center_force, -0.8, 0.8)
       # if we are in a small lane, reduce centering force to prevent pingponging
@@ -216,7 +216,7 @@ class LanePlanner:
       # apply less lane centering for a direction we are already turning
       # this helps avoid overturning in an existing turn
       if math.copysign(1, self.center_force) == math.copysign(1, vcurv[0]):
-        self.center_force *= 0.7
+        self.center_force *= interp(abs(vcurv[0]), [0.0, 0.3], [1.0, 0.6])
       # if we are lane changing, cut center force
       self.center_force *= self.lane_change_multiplier
 
