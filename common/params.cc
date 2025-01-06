@@ -62,6 +62,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"ResetExtrinsicCalibration", CLEAR_ON_MANAGER_START},
     {"UseAccel", PERSISTENT},
     {"SensitiveSlow", PERSISTENT},
+    {"AlwaysCalibrate", PERSISTENT},
     {"UseDistSpeed", PERSISTENT},
     {"UseModelPath", PERSISTENT},
     {"IsLdwEnabled", PERSISTENT},

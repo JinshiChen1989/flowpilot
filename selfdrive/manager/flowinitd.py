@@ -84,6 +84,7 @@ def main():
                         ("UseAccel", "1"),
                         ("F3", "1"),
                         ("UseModelPath", "0"),
+                        ("AlwaysCalibrate", "1"),
                         ("UseDistSpeed", "0"),
                         ("SensitiveSlow", "1"),
                         ("WideCameraOnly", "1"),

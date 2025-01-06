@@ -62,6 +62,7 @@ class Calibrator:
 
     # Read saved calibration
     self.params = Params()
+    self.always_calibrate = self.params.get_bool("AlwaysCalibrate")
     calibration_params = self.params.get("CalibrationParams")
     rpy_init = RPY_INIT
     wide_from_device_euler = WIDE_FROM_DEVICE_EULER_INIT
@@ -208,10 +209,14 @@ class Calibrator:
                              np.arctan2(trans[1], trans[0])])
     new_rpy = euler_from_rot(rot_from_euler(self.get_smooth_rpy()).dot(rot_from_euler(observed_rpy)))
     new_rpy = sanity_clip(new_rpy)
-    
-    # if we are calibrated already, dont add invalid calibrations to the average
-    if self.cal_status == log.LiveCalibrationData.Status.calibrated and not is_calibration_valid(new_rpy):
-      return None
+
+    if self.cal_status == log.LiveCalibrationData.Status.calibrated:
+      # if we are not configured for always-on calibration, exit since we are already calibrated
+      if not self.always_calibrate:
+        return None
+      # if we are calibrated, dont add invalid calibrations to the average
+      if not is_calibration_valid(new_rpy):
+        return None
 
     if len(wide_from_device_euler) == 3:
       new_wide_from_device_euler = np.array(wide_from_device_euler)
@@ -297,6 +302,7 @@ def calibrationd_thread(sm: Optional[messaging.SubMaster] = None, pm: Optional[m
 
     # 4Hz driven by cameraOdometry
     if sm.frame % 5 == 0:
+      calibrator.always_calibrate = calibrator.params.get_bool("AlwaysCalibrate")
       if calibrator.params.get_bool("ResetExtrinsicCalibration") is True:
         calibrator.reset()
         calibrator.update_status()
