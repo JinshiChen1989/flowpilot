@@ -10,8 +10,8 @@ from common.params import Params
 
 TRAJECTORY_SIZE = 33
 # positive numbers go right
-CAMERA_OFFSET = 0.02
-LANE_OFFSET = 0.08
+CAMERA_OFFSET = 0.03
+LANE_OFFSET = 0.1
 MIN_LANE_DISTANCE = 2.6
 MAX_LANE_DISTANCE = 3.7
 TYPICAL_MIN_LANE_DISTANCE = 2.7
@@ -19,10 +19,10 @@ TYPICAL_MAX_LANE_DISTANCE = 3.4
 CENTER_FORCE_GENERAL_SCALE = 0.5
 KEEP_FROM_EDGE = 1.3
 # these offsets only apply with certain lane changes
-LEFT_LANE_CHANGE_OFFSET = 0.2
+LEFT_LANE_CHANGE_OFFSET = 0.0
 RIGHT_LANE_CHANGE_OFFSET = 0.0
 # higher offset means steering more right
-DESIRED_CURVE_OFFSET = 0.03
+DESIRED_CURVE_OFFSET = 0.0
 DESIRED_CURVE_TO_STEERANGLE_RATIO = -0.037
 # overall desire curve steer scale, set to 0 to disable using desired_curvature
 STEER_DISAGREEMENT_SCALE = 0.0785
