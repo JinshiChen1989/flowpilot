@@ -330,7 +330,6 @@ class CarState(CarStateBase):
       ("CGW1", 10),
       ("CGW2", 5),
       ("CGW4", 5),
-      ("FCA11", 10),
       ("WHL_SPD11", 50),
       ("SAS11", 100),
     ]
