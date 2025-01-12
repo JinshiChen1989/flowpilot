@@ -44,8 +44,6 @@ class CarState(CarStateBase):
     # phr00t fork
     self.clu_Vanz = 0
     self.time_cruise_cancelled = datetime.datetime(2000, 10, 1, 1, 1, 1, 0)
-    self.fca_relvel = 0.0
-    self.fca_timetohit = 0.0
 
     self.cruise_info = {}
 
@@ -80,9 +78,6 @@ class CarState(CarStateBase):
     ret.standstill = ret.vEgoRaw < 0.1
 
     self.clu_Vanz = ret.vEgo * CV.MS_TO_MPH
-
-    self.fca_timetohit = cp.vl["FCA11"]["FCA_TimetoCollision"] / 1000.0 # convert ms to s
-    self.fca_relvel = cp.vl["FCA11"]["FCA_RelativeVelocity"] # in m/s
 
     self.cluster_speed_counter += 1
     if self.cluster_speed_counter > CLUSTER_SAMPLE_RATE:
@@ -307,9 +302,6 @@ class CarState(CarStateBase):
 
       ("Cruise_Limit_Target", "E_EMS11"),
 
-      ("FCA_RelativeVelocity", "FCA11"),
-      ("FCA_TimetoCollision", "FCA11"),
-
       ("CR_Mdps_StrColTq", "MDPS12"),
       ("CF_Mdps_ToiActive", "MDPS12"),
       ("CF_Mdps_ToiUnavail", "MDPS12"),
@@ -330,7 +322,6 @@ class CarState(CarStateBase):
       ("CGW1", 10),
       ("CGW2", 5),
       ("CGW4", 5),
-      ("FCA11", 10),
       ("WHL_SPD11", 50),
       ("SAS11", 100),
     ]

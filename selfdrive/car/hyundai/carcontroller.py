@@ -430,7 +430,7 @@ class CarController:
         self.temp_disable_spamming = 5 # take a break
 
     # print debug data
-    sLogger.Send("0ac" + "{:.2f}".format(CS.out.aEgo) + " c" + "{:.1f}".format(CS.out.cruiseState.speed) + " v" + "{:.2f}".format(l0v * 2.23694) + " ta" + "{:.2f}".format(target_accel) + " fv" + "{:.1f}".format(CS.fca_relvel) + " ds" + "{:.1f}".format(desired_speed) + " dv" + "{:.2f}".format(lead_vdiff_mph) + " vs" + "{:.2f}".format(l0vstd * 2.23694) + " ld" + "{:.1f}".format(l0d) + " ft" + "{:.1f}".format(CS.fca_timetohit) + " du" + "{:.1f}".format(l0dstd))
+    sLogger.Send("0ac" + "{:.2f}".format(CS.out.aEgo) + " c" + "{:.1f}".format(CS.out.cruiseState.speed) + " v" + "{:.2f}".format(l0v * 2.23694) + " ta" + "{:.2f}".format(target_accel) + " la" + "{:.1f}".format(self.lead_accel_accum) + " ds" + "{:.1f}".format(desired_speed) + " dv" + "{:.2f}".format(lead_vdiff_mph) + " vs" + "{:.2f}".format(l0vstd * 2.23694) + " ld" + "{:.1f}".format(l0d) + " ms" + "{:.1f}".format(avg_accel_min) + " du" + "{:.1f}".format(l0dstd))
 
     new_actuators = actuators.copy()
     new_actuators.steer = apply_steer / self.params.STEER_MAX
