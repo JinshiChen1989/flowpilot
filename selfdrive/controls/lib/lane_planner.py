@@ -25,7 +25,7 @@ RIGHT_LANE_CHANGE_OFFSET = 0.0
 DESIRED_CURVE_OFFSET = 0.0
 DESIRED_CURVE_TO_STEERANGLE_RATIO = -0.037
 # overall desire curve steer scale, set to 0 to disable using desired_curvature
-STEER_DISAGREEMENT_SCALE = 0.0785
+STEER_DISAGREEMENT_SCALE = 0.0 #0.0785
 
 def clamp(num, min_value, max_value):
   # weird broken case, do something reasonable
@@ -248,7 +248,7 @@ class LanePlanner:
       if not self.UseModelPath:
         ultimate_path_mix = lane_trust * interp(max_lane_width_seen, [4.0, 6.0], [1.0, 0.0])
 
-      # max out at 50% model/lane system
+      # max out at 80% model/lane system
       final_ultimate_path_mix = clamp(self.lane_change_multiplier * ultimate_path_mix, 0.0, 0.8)
 
       # now that we have steer_disagreement as a solid guide, we don't always need to rely on center_force
