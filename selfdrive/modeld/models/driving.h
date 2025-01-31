@@ -282,11 +282,11 @@ struct ModelOutput {
   const float padding, padding2;
 };
 
-const int MODEL_POSE_OFFSET = 5953;
-const int DESIRE_PRED_OFFSET = 5921;
-const int ROAD_TRANSFORM_OFFSET = 5983;
-const int WIDE_DEVICE_EULER_OFFSET = 5965;
-const int DESIRED_CURV_OFFSET = 5995;
+const int MODEL_POSE_OFFSET = 5955;
+const int DESIRE_PRED_OFFSET = 5923;
+const int ROAD_TRANSFORM_OFFSET = 5985;
+const int WIDE_DEVICE_EULER_OFFSET = 5967;
+const int DESIRED_CURV_OFFSET = 5997;
 constexpr int OUTPUT_SIZE = sizeof(ModelOutput) / sizeof(float);
 
 #ifdef TEMPORAL
