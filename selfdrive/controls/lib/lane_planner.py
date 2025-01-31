@@ -19,7 +19,7 @@ TYPICAL_MAX_LANE_DISTANCE = 3.4
 CENTER_FORCE_GENERAL_SCALE = 0.5
 KEEP_FROM_EDGE = 1.3
 # these offsets only apply with certain lane changes
-LEFT_LANE_CHANGE_OFFSET = 0.0
+LEFT_LANE_CHANGE_OFFSET = 0.2
 RIGHT_LANE_CHANGE_OFFSET = 0.0
 # higher offset means steering more right
 DESIRED_CURVE_OFFSET = 0.0
