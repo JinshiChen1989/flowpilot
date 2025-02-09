@@ -23,7 +23,7 @@ LEFT_LANE_CHANGE_OFFSET = 0.175
 RIGHT_LANE_CHANGE_OFFSET = 0.0
 # higher offset means steering more right
 DESIRED_CURVE_OFFSET = 0.02
-DESIRED_CURVE_TO_STEERANGLE_RATIO = -0.045
+DESIRED_CURVE_TO_STEERANGLE_RATIO = -0.044
 # overall desire curve steer scale, set to 0 to disable using desired_curvature
 STEER_DISAGREEMENT_SCALE = 0.0785
 
