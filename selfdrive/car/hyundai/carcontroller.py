@@ -26,7 +26,8 @@ MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 TICKS_FOR_HARDSTEERING_SMOOTHING = 50
 DISTSPEED_TIMEFRAME = 1.0
 DISTSPEED_AVERAGING = 5
-SLOW_THRESHOLD = 1.45
+SLOW_THRESHOLD_FAR = 2.0
+SLOW_THRESHOLD_NEAR = 1.275
 
 def signsquare(x):
   return x * abs(x)
@@ -303,7 +304,7 @@ class CarController:
         # 1) if the lead car is far away in either time or distance
         # 2) if the lead car is moving away from us
         leadcar_going_faster = lead_vdiff_mph >= 0.0
-        car_far_away = l0d >= 80.0
+        car_far_away = l0d >= 90.0
         # calculate the final max speed we should be going based on lead car
         max_lead_adj = clu11_speed + adjust_speed
         # if the lead car is going faster than us, but we want to slow down for some reason (to make space etc)
@@ -361,18 +362,20 @@ class CarController:
         # lets see if we should be braking enough before doing so
         lead_accel_diff = signsquare(0.75 * (0.25 + target_accel_lead - CS.out.aEgo))
         lead_accel_adj = lead_accel_diff * (20/100) # based off of 20 fps model and this function @ 100hz
+        # what should our slow threshold be?
+        slow_threshold = interp(l0d, [20.0, 90.0], [SLOW_THRESHOLD_NEAR, SLOW_THRESHOLD_FAR]) 
         if lead_accel_diff < 0:
           self.lead_accel_accum += lead_accel_adj
         else:
           # cap slow threshold to wean off
-          if self.lead_accel_accum < -SLOW_THRESHOLD:
-            self.lead_accel_accum = -SLOW_THRESHOLD
+          if self.lead_accel_accum < -slow_threshold:
+            self.lead_accel_accum = -slow_threshold
           self.lead_accel_accum += lead_accel_adj
           # never go positive
           if self.lead_accel_accum > 0:
             self.lead_accel_accum = 0
         # if it seems like we should be slowing down enough over time, kill cruise to brake harder
-        if self.lead_accel_accum < (-SLOW_THRESHOLD if self.sensitiveSlow else -(SLOW_THRESHOLD + 0.1)) and clu11_speed - desired_speed >= 1.85:
+        if self.lead_accel_accum < -slow_threshold and clu11_speed - desired_speed >= 1.75:
           desired_speed = 0
     else:
       # we are stopping for some other reason, clear our lead accumulator
