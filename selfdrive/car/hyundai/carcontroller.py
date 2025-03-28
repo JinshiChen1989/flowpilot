@@ -252,10 +252,12 @@ class CarController:
             # do we have enough distances over time to get a distspeed estimate?
             if len(self.lead_distance_distavg) >= DISTSPEED_AVERAGING:
               use_basic_speedadj = False
+              # determine how much to weight distspeed over model speed based on distance from lead and certainty
+              # model speed grows worse and worse 50+ meters out, so distspeed should be slowly used more
+              distspeed_weight = interp(l0dstd, [4.0, 10.0], [0.8, 0.0])
+              distspeed_weight *= interp(l0d, [50.0, 90.0], [0.5, 0.9])
               # average the model and distspeed values
-              avg_speeds = 0.5 * (lead_vdiff_mph + clamp(statistics.fmean(self.lead_distance_distavg), min_allowed, max_allowed))
-              # use model speed more if there is poor distance confidence
-              lead_vdiff_mph = interp(l0dstd, [3.0, 9.0], [avg_speeds, lead_vdiff_mph])
+              lead_vdiff_mph = (1.0 - distspeed_weight) * lead_vdiff_mph + statistics.fmean(self.lead_distance_distavg) * distspeed_weight
               self.lead_distance_distavg.pop(0)
     else:
       # no lead, clear data
@@ -304,7 +306,7 @@ class CarController:
         # 1) if the lead car is far away in either time or distance
         # 2) if the lead car is moving away from us
         leadcar_going_faster = lead_vdiff_mph >= 0.0
-        car_far_away = l0d >= 90.0
+        car_far_away = l0d >= 80.0
         # calculate the final max speed we should be going based on lead car
         max_lead_adj = clu11_speed + adjust_speed
         # if the lead car is going faster than us, but we want to slow down for some reason (to make space etc)
