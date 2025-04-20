@@ -299,7 +299,7 @@ class CarController:
         lead_time = l0d / speed_in_ms
         # caculate a target lead car time, which is ~3 seconds at slow speeds, but gradually max_allowed
         # closer for faster speeds
-        target_time = interp(clu11_speed, [20.0, 70.0], [2.7, 2.2])
+        target_time = interp(clu11_speed, [20.0, 70.0], [3.0, 2.0])
         # calculate the speed difference we should be going
         adjust_speed = lead_vdiff_mph + signsquare(5 * (lead_time - target_time)/target_time)
         # don't sudden slow for certain situations, as this causes significant braking
