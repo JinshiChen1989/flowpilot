@@ -26,6 +26,7 @@ DESIRED_CURVE_OFFSET = 0.0
 DESIRED_CURVE_TO_STEERANGLE_RATIO = -0.041
 # overall desire curve steer scale, set to 0 to disable using desired_curvature
 STEER_DISAGREEMENT_SCALE = 0.075
+MAX_STEER_DISAGREEMENT = 0.4
 
 def clamp(num, min_value, max_value):
   # weird broken case, do something reasonable
@@ -166,7 +167,7 @@ class LanePlanner:
     target_steering_angle = desired_curve / DESIRED_CURVE_TO_STEERANGLE_RATIO
     steer_disagreement = target_steering_angle - CS.steeringAngleDeg
     # need to flip sign, as if we want to steer left (positive), we need more left shift (negative)
-    steer_disagreement = -clamp(steer_disagreement * STEER_DISAGREEMENT_SCALE, -1.1, 1.1)
+    steer_disagreement = -clamp(steer_disagreement * STEER_DISAGREEMENT_SCALE, -MAX_STEER_DISAGREEMENT, MAX_STEER_DISAGREEMENT)
     # scale down steer_disagreement when slow to prevent slow-speed wobble
     steer_disagreement *= interp(v_ego, [3.5, 9.8], [0.0, 1.0])
     # reduce steering disagreement during lane changes
