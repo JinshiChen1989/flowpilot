@@ -16,7 +16,7 @@ MIN_LANE_DISTANCE = 2.6
 MAX_LANE_DISTANCE = 3.7
 TYPICAL_MIN_LANE_DISTANCE = 2.7
 TYPICAL_MAX_LANE_DISTANCE = 3.4
-CENTER_FORCE_GENERAL_SCALE = 0.55
+CENTER_FORCE_GENERAL_SCALE = 0.5
 KEEP_FROM_EDGE = 1.5
 # these offsets only apply with certain lane changes
 LEFT_LANE_CHANGE_OFFSET = 0.02
@@ -217,7 +217,7 @@ class LanePlanner:
       # apply less lane centering for a direction we are already turning
       # this helps avoid overturning in an existing turn
       if math.copysign(1, self.center_force) == math.copysign(1, vcurv[0]):
-        self.center_force *= interp(abs(vcurv[0]), [0.0, 0.3], [1.0, 0.6])
+        self.center_force *= interp(abs(vcurv[0]), [0.0, 0.4], [1.0, 0.6])
       # if we are lane changing, cut center force
       self.center_force *= self.lane_change_multiplier
 
