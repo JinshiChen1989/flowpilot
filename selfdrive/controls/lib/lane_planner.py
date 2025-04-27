@@ -234,9 +234,11 @@ class LanePlanner:
           max_lane_width_seen = lane_width
         # average lane widths from what we think we are on, and what we see at this point in the road
         final_lane_width = clamp((lane_width + self.lane_width) * 0.5, MIN_LANE_DISTANCE, MAX_LANE_DISTANCE)
+        # determine how close we should be to each lane based on curve at this point
+        distance_from_right = interp(vcurv[index], [-0.4, 0.4], [0.4, 0.6])
         # ok, get ideal point from each lane
-        ideal_left = left_anchor + final_lane_width * 0.5
-        ideal_right = right_anchor - final_lane_width * 0.5
+        ideal_left = left_anchor + final_lane_width * (1.0 - distance_from_right)
+        ideal_right = right_anchor - final_lane_width * distance_from_right
         # merge them to get an ideal center point, based on which value we want to prefer
         ideal_point = lerp(ideal_left, ideal_right, r_prob)
         # make sure we are clamped within the road edges tho
@@ -252,8 +254,7 @@ class LanePlanner:
       # max out at 80% model/lane system
       final_ultimate_path_mix = clamp(self.lane_change_multiplier * ultimate_path_mix, 0.0, 0.8)
 
-      # now that we have steer_disagreement as a solid guide, we don't always need to rely on center_force
-      # so, scale back center_force if we are not very confident in our lane lines
+      # scale back center_force if we are not very confident in our lane lines
       self.center_force *= ultimate_path_mix
 
       # debug
