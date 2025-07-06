@@ -224,9 +224,6 @@ class CarController:
     l0time = radarState.leadOne.aLeadTau
     lead_vdiff_mph = l0v * CV.MS_TO_MPH
 
-    # default use basic speed adjustment
-    use_basic_speedadj = True
-
     # if we are using the distspeed feature, monitor distance to better estimate speed within standard deviation
     if l0prob >= 0.5 and self.usingDistSpeed:
       # ok, start collecting data on the lead car
@@ -251,11 +248,10 @@ class CarController:
             self.lead_distance_times.pop(0)
             # do we have enough distances over time to get a distspeed estimate?
             if len(self.lead_distance_distavg) >= DISTSPEED_AVERAGING:
-              use_basic_speedadj = False
               # determine how much to weight distspeed over model speed based on distance from lead and certainty
               # model speed grows worse and worse 50+ meters out, so distspeed should be slowly used more
-              distspeed_weight = interp(l0dstd, [4.0, 10.0], [0.8, 0.0])
-              distspeed_weight *= interp(l0d, [50.0, 90.0], [0.5, 0.9])
+              distspeed_weight = interp(l0dstd, [4.0, 8.0], [0.8, 0.0])
+              distspeed_weight *= interp(l0d, [50.0, 90.0], [0.5, 0.8])
               # average the model and distspeed values
               lead_vdiff_mph = (1.0 - distspeed_weight) * lead_vdiff_mph + statistics.fmean(self.lead_distance_distavg) * distspeed_weight
               self.lead_distance_distavg.pop(0)
@@ -265,19 +261,11 @@ class CarController:
       self.lead_distance_times.clear()
       self.lead_distance_distavg.clear()
 
-    # if we didn't get an adjusted lead car speed with distspeed estimate, use a basic speed adjustment system
-    if use_basic_speedadj:
-      # adjust l0v based on l0vstd and l0v
-      l0vstd_multiplier = 1.75 / (1 + math.exp(-l0v-0.289)) - 1.0
-
-      # if we think we should have the lead car going faster, verify we are not too close to the lead car
-      # before applying this fully
-      if l0vstd_multiplier > 0:
-        cutoff_distance = clamp(CS.out.vEgo * 1.75, 35, 60)
-        l0vstd_multiplier *= interp(l0d, [10.0, cutoff_distance], [0.0, 1.0])
-
-      # ok, get a good estimate of the lead car speed
-      lead_vdiff_mph = (l0v + l0vstd_multiplier * l0vstd) * 2.23694
+    # cars far into the distance seem to always be considered driving slower than they actually are
+    # especially at high speeds
+    # so, add the deviation to the speed the further it is away, and the faster you are driving
+    possibly_add_to_speed = interp(l0d, [60.0, 75.0], [0.0, l0vstd * 2.23694])
+    lead_vdiff_mph += interp(clu11_speed, [50.0, 70.0], [0.0, possibly_add_to_speed])
 
     # start with our picked max speed
     desired_speed = max_speed_in_mph
