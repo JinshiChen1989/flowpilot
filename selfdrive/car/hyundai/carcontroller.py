@@ -26,8 +26,14 @@ MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 TICKS_FOR_HARDSTEERING_SMOOTHING = 50
 DISTSPEED_TIMEFRAME = 1.0
 DISTSPEED_AVERAGING = 5
-SLOW_THRESHOLD_FAR = 2.0
-SLOW_THRESHOLD_NEAR = 1.275
+
+# lead car "sudden slow" thresholds based on distance
+SLOW_THRESHOLD_NEAR_DIST = 20
+SLOW_THRESHOLD_MID_DIST = 40
+SLOW_THRESHOLD_FAR_DIST = 80
+SLOW_THRESHOLD_FAR = 7.0
+SLOW_THRESHOLD_MID = 1.5
+SLOW_THRESHOLD_NEAR = 1.0
 
 def signsquare(x):
   return x * abs(x)
@@ -99,7 +105,7 @@ class CarController:
     self.lead_distance_hist = []
     self.lead_distance_times = []
     self.lead_distance_distavg = []
-    self.lead_seen_counter = 0
+    # self.lead_seen_counter = 0
 
     self.temp_disable_spamming = 0
 
@@ -278,7 +284,7 @@ class CarController:
 
     # is there a lead worth making decisions on?
     if l0prob >= 0.5:
-      self.lead_seen_counter += 1
+      # self.lead_seen_counter += 1
       if clu11_speed > 5:
         # calculate an estimate of the lead car's speed
         lead_speed = clu11_speed + lead_vdiff_mph
@@ -299,20 +305,20 @@ class CarController:
         max_lead_adj = clu11_speed + adjust_speed
         # if the lead car is going faster than us, but we want to slow down for some reason (to make space etc)
         # don't go much slower than the lead car, and cancel any sudden slowing that may be happening
-        fasterleadcar_imposed_speed_limit = max(clu11_speed - 1.5, lead_speed - 2.3)
+        fasterleadcar_imposed_speed_limit = max(clu11_speed - 1.25, lead_speed - 2.3)
         if leadcar_going_faster and max_lead_adj < fasterleadcar_imposed_speed_limit:
           # slowly make space between cars
           max_lead_adj = fasterleadcar_imposed_speed_limit
-        elif (leadcar_going_faster or car_far_away) and max_lead_adj < clu11_speed - 1.5:
+        elif (leadcar_going_faster or car_far_away) and max_lead_adj < clu11_speed - 1.25:
           # slow down, but not aggresively
-          max_lead_adj = clu11_speed - 1.5
-        elif not leadcar_going_faster and self.lead_seen_counter < 150 and max_lead_adj > clu11_speed:
-          max_lead_adj = clu11_speed # dont speed up if we see a new car and its not going faster than us
+          max_lead_adj = clu11_speed - 1.25
+        #elif not leadcar_going_faster and self.lead_seen_counter < 150 and max_lead_adj > clu11_speed:
+        #  max_lead_adj = clu11_speed # dont speed up if we see a new car and its not going faster than us
         # cap our desired_speed to this final max speed
         if desired_speed > max_lead_adj:
           desired_speed = max_lead_adj
-    else:
-      self.lead_seen_counter = 0
+    #else:
+    #  self.lead_seen_counter = 0
 
     allow_reenable_cruise = False
     target_accel = 0.0
@@ -353,7 +359,7 @@ class CarController:
         lead_accel_diff = signsquare(0.75 * (0.25 + target_accel_lead - CS.out.aEgo))
         lead_accel_adj = lead_accel_diff * (20/100) # based off of 20 fps model and this function @ 100hz
         # what should our slow threshold be?
-        slow_threshold = interp(l0d, [20.0, 90.0], [SLOW_THRESHOLD_NEAR, SLOW_THRESHOLD_FAR]) 
+        slow_threshold = interp(l0d, [SLOW_THRESHOLD_NEAR_DIST, SLOW_THRESHOLD_MID_DIST, SLOW_THRESHOLD_FAR_DIST], [SLOW_THRESHOLD_NEAR, SLOW_THRESHOLD_MID, SLOW_THRESHOLD_FAR]) 
         if lead_accel_diff < 0:
           self.lead_accel_accum += lead_accel_adj
         else:
@@ -365,7 +371,7 @@ class CarController:
           if self.lead_accel_accum > 0:
             self.lead_accel_accum = 0
         # if it seems like we should be slowing down enough over time, kill cruise to brake harder
-        if self.lead_accel_accum < -slow_threshold and clu11_speed - desired_speed >= 1.75:
+        if self.lead_accel_accum < -slow_threshold and clu11_speed - desired_speed >= 1.5:
           desired_speed = 0
     else:
       # we are stopping for some other reason, clear our lead accumulator
