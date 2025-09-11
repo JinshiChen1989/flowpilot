@@ -258,7 +258,7 @@ class LanePlanner:
       self.center_force *= ultimate_path_mix
 
       # debug
-      sLogger.Send("Cf" + "{:.2f}".format(self.center_force) + " Mx" + "{:.2f}".format(final_ultimate_path_mix) + " Sd" + "{:.2f}".format(steer_disagreement) + " LX" + "{:.1f}".format(self.lll_y[0]) + " RX" + "{:.1f}".format(self.rll_y[0]) + " LW" + "{:.1f}".format(self.lane_width) + " SA" + "{:.1f}".format(CS.steeringAngleDeg) + " Dc" + "{:.2f}".format(desired_curve) + " tS" + "{:.1f}".format(target_steering_angle))
+      sLogger.Send("Cf" + "{:.2f}".format(self.center_force) + " Mx" + "{:.2f}".format(final_ultimate_path_mix) + " Sd" + "{:.2f}".format(steer_disagreement) + " LX" + "{:.1f}".format(self.lll_y[0]) + " RX" + "{:.1f}".format(self.rll_y[0]) + " LW" + "{:.1f}".format(self.lane_width) + " SA" + "{:.1f}".format(CS.steeringAngleDeg) + " Dc" + "{:.2f}".format(desired_curve) + " tS" + "{:.1f}".format(target_steering_angle) + " lc" + "{:.2f}".format(self.lane_change_multiplier))
 
       safe_idxs = np.isfinite(self.ll_t)
       if safe_idxs[0] and final_ultimate_path_mix > 0.0:
