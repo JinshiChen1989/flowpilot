@@ -270,8 +270,9 @@ class CarController:
     # cars far into the distance seem to always be considered driving slower than they actually are
     # especially at high speeds
     # so, add the deviation to the speed the further it is away, and the faster you are driving
-    possibly_add_to_speed = interp(l0d, [60.0, 75.0], [0.0, l0vstd * 2.23694])
-    lead_vdiff_mph += interp(clu11_speed, [50.0, 70.0], [0.0, possibly_add_to_speed])
+    # REMOVING for NOTRE DAME TEST
+    # possibly_add_to_speed = interp(l0d, [60.0, 75.0], [0.0, l0vstd * 2.23694])
+    # lead_vdiff_mph += interp(clu11_speed, [50.0, 70.0], [0.0, possibly_add_to_speed])
 
     # start with our picked max speed
     desired_speed = max_speed_in_mph
