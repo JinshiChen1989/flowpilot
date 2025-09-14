@@ -257,7 +257,7 @@ class CarController:
               # determine how much to weight distspeed over model speed based on distance from lead and certainty
               # model speed grows worse and worse 50+ meters out, so distspeed should be slowly used more
               distspeed_weight = interp(l0dstd, [4.0, 8.0], [0.8, 0.0])
-              distspeed_weight *= interp(l0d, [50.0, 90.0], [0.5, 0.8])
+              distspeed_weight *= interp(l0d, [50.0, 90.0], [0.5, 0.75])
               # average the model and distspeed values
               lead_vdiff_mph = (1.0 - distspeed_weight) * lead_vdiff_mph + statistics.fmean(self.lead_distance_distavg) * distspeed_weight
               self.lead_distance_distavg.pop(0)
