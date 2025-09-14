@@ -18,6 +18,7 @@ TYPICAL_MIN_LANE_DISTANCE = 2.7
 TYPICAL_MAX_LANE_DISTANCE = 3.4
 CENTER_FORCE_GENERAL_SCALE = 0.5
 KEEP_FROM_EDGE = 1.5
+KEEP_FROM_LANE = 1.25
 # these offsets only apply with certain lane changes
 LEFT_LANE_CHANGE_OFFSET = -0.1
 RIGHT_LANE_CHANGE_OFFSET = 0.1
@@ -30,7 +31,7 @@ MAX_STEER_DISAGREEMENT = 0.4
 
 def clamp(num, min_value, max_value):
   # weird broken case, do something reasonable
-  if min_value > num > max_value:
+  if min_value > num > max_value or math.isnan(num):
     return (min_value + max_value) * 0.5
   # ok, basic min/max below
   if num < min_value:
@@ -241,8 +242,9 @@ class LanePlanner:
         ideal_right = right_anchor - final_lane_width * distance_from_right
         # merge them to get an ideal center point, based on which value we want to prefer
         ideal_point = lerp(ideal_left, ideal_right, r_prob)
-        # make sure we are clamped within the road edges tho
+        # make sure we are clamped within the road edges/lanes as a final sanity check
         ideal_point = clamp(ideal_point, self.le_y[index] + KEEP_FROM_EDGE, self.re_y[index] - KEEP_FROM_EDGE)
+        ideal_point = clamp(ideal_point, self.lll_y[index] + KEEP_FROM_LANE, self.rll_y[index] - KEEP_FROM_LANE)
         # add it to our ultimate path
         self.ultimate_path[index] = ideal_point
 
