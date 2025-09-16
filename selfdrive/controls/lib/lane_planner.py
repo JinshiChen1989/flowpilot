@@ -29,6 +29,10 @@ DESIRED_CURVE_TO_STEERANGLE_RATIO = -0.04
 STEER_DISAGREEMENT_SCALE = 0.075
 MAX_STEER_DISAGREEMENT = 0.4
 
+def weightedAverage(data):
+  Weights = list(range(1, len(data) + 1))
+  return np.average(data, weights=Weights)
+
 def clamp(num, min_value, max_value):
   # weird broken case, do something reasonable
   if min_value > num > max_value or math.isnan(num):
@@ -202,25 +206,8 @@ class LanePlanner:
       max_lane_width_seen = current_lane_width
       half_len = len(self.lll_y) // 2
 
-      # additional centering force, if needed
-      rightBorder = min(self.re_y[0], self.rll_y[0])
-      leftBorder = max(self.le_y[0], self.lll_y[0])
-      # ok, how far off of center are we, considering we want to be closer to edges of the road?
-      target_centering = rightBorder + leftBorder
-      # fancy smooth increasing centering force based on lane width
-      self.center_force = CENTER_FORCE_GENERAL_SCALE * target_centering
-      # apply a cap centering force
-      self.center_force = clamp(self.center_force, -0.8, 0.8)
-      # if we are in a small lane, reduce centering force to prevent pingponging
-      self.center_force *= interp((lane_tightness + self.lane_width) * 0.5, [2.6, 2.8], [0.0, 1.0])
-      # likewise if the lane is really big, reduce centering force to not throw us around in it
-      self.center_force *= interp((lane_tightness + self.lane_width) * 0.5, [4.0, 6.0], [1.0, 0.0])
-      # apply less lane centering for a direction we are already turning
-      # this helps avoid overturning in an existing turn
-      if math.copysign(1, self.center_force) == math.copysign(1, vcurv[0]):
-        self.center_force *= interp(abs(vcurv[0]), [0.0, 0.4], [1.0, 0.6])
-      # if we are lane changing, cut center force
-      self.center_force *= self.lane_change_multiplier
+      # weighted centering average data collection
+      centering_points = []
 
       # go through all points in our lanes...
       for index in range(len(self.lll_y) - 1, -1, -1):
@@ -229,10 +216,14 @@ class LanePlanner:
         left_anchor = max(self.lll_y[index], self.le_y[index])
         # get the raw lane width for this point
         lane_width = right_anchor - left_anchor
-        # is this lane getting bigger relatively close to us? useful for later determining if we want to mix in the
-        # model path with very large lanes (that might be splitting into multiple lanes)
-        if lane_width > max_lane_width_seen and index <= half_len:
-          max_lane_width_seen = lane_width
+        # for points that are close to us...
+        if index <= half_len:
+          # add centering point for later weighting
+          centering_points.append(right_anchor + left_anchor)
+          # is this lane getting bigger relatively close to us? useful for later determining if we want to mix in the
+          # model path with very large lanes (that might be splitting into multiple lanes)
+          if lane_width > max_lane_width_seen:
+            max_lane_width_seen = lane_width
         # average lane widths from what we think we are on, and what we see at this point in the road
         final_lane_width = clamp((lane_width + self.lane_width) * 0.5, MIN_LANE_DISTANCE, MAX_LANE_DISTANCE)
         # determine how close we should be to each lane based on curve at this point
@@ -247,6 +238,25 @@ class LanePlanner:
         ideal_point = clamp(ideal_point, self.lll_y[index] + KEEP_FROM_LANE, self.rll_y[index] - KEEP_FROM_LANE)
         # add it to our ultimate path
         self.ultimate_path[index] = ideal_point
+
+      # ok, how far off of center are we, considering we want to be closer to edges of the road?
+      target_centering = weightedAverage(centering_points)
+      # fancy smooth increasing centering force based on lane width
+      self.center_force = CENTER_FORCE_GENERAL_SCALE * target_centering
+      # apply a cap centering force
+      self.center_force = clamp(self.center_force, -0.8, 0.8)
+      # if we are in a small lane, reduce centering force to prevent pingponging
+      self.center_force *= interp((lane_tightness + self.lane_width) * 0.5, [2.6, 2.8], [0.0, 1.0])
+      # likewise if the lane is really big, reduce centering force to not throw us around in it
+      self.center_force *= interp((lane_tightness + self.lane_width) * 0.5, [4.0, 6.0], [1.0, 0.0])
+      # apply less lane centering for a direction we are already turning
+      # this helps avoid overturning in an existing turn
+      if math.copysign(1, self.center_force) == math.copysign(1, vcurv[0]):
+        self.center_force *= interp(abs(vcurv[0]), [0.0, 0.4], [1.0, 0.6])
+      # if we are lane changing, cut center force
+      self.center_force *= self.lane_change_multiplier
+      # reduce centering force if we don't actually know how wide the lane actually is
+      self.center_force *= width_trust
 
       # do we want to mix in the model path a little bit if lanelines are going south?
       ultimate_path_mix = 0.0
