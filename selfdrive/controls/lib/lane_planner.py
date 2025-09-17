@@ -216,14 +216,13 @@ class LanePlanner:
         left_anchor = max(self.lll_y[index], self.le_y[index])
         # get the raw lane width for this point
         lane_width = right_anchor - left_anchor
-        # for points that are close to us...
-        if index <= half_len:
-          # add centering point for later weighting
+        # is this lane getting bigger relatively close to us? useful for later determining if we want to mix in the
+        # model path with very large lanes (that might be splitting into multiple lanes)
+        if index <= half_len and lane_width > max_lane_width_seen:
+          max_lane_width_seen = lane_width
+        # add centering point for later weighting for points really close to us
+        if index <= 5:
           centering_points.append(right_anchor + left_anchor)
-          # is this lane getting bigger relatively close to us? useful for later determining if we want to mix in the
-          # model path with very large lanes (that might be splitting into multiple lanes)
-          if lane_width > max_lane_width_seen:
-            max_lane_width_seen = lane_width
         # average lane widths from what we think we are on, and what we see at this point in the road
         final_lane_width = clamp((lane_width + self.lane_width) * 0.5, MIN_LANE_DISTANCE, MAX_LANE_DISTANCE)
         # determine how close we should be to each lane based on curve at this point
