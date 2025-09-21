@@ -16,7 +16,7 @@ MIN_LANE_DISTANCE = 2.6
 MAX_LANE_DISTANCE = 3.7
 TYPICAL_MIN_LANE_DISTANCE = 2.7
 TYPICAL_MAX_LANE_DISTANCE = 3.4
-CENTER_FORCE_GENERAL_SCALE = 0.5
+CENTER_FORCE_GENERAL_SCALE = 0.6
 KEEP_FROM_EDGE = 1.5
 KEEP_FROM_LANE = 1.25
 # these offsets only apply with certain lane changes
@@ -246,21 +246,20 @@ class LanePlanner:
       self.center_force = clamp(self.center_force, -0.8, 0.8)
       # if we are in a small lane, reduce centering force to prevent pingponging
       self.center_force *= interp((lane_tightness + self.lane_width) * 0.5, [2.6, 2.8], [0.0, 1.0])
-      # likewise if the lane is really big, reduce centering force to not throw us around in it
-      self.center_force *= interp((lane_tightness + self.lane_width) * 0.5, [4.0, 6.0], [1.0, 0.0])
       # apply less lane centering for a direction we are already turning
       # this helps avoid overturning in an existing turn
       if math.copysign(1, self.center_force) == math.copysign(1, vcurv[0]):
-        self.center_force *= interp(abs(vcurv[0]), [0.0, 0.4], [1.0, 0.6])
+        self.center_force *= interp(abs(vcurv[0]), [0.0, 0.4], [1.0, 0.8])
       # if we are lane changing, cut center force
       self.center_force *= self.lane_change_multiplier
-      # reduce centering force if we don't actually know how wide the lane actually is
-      self.center_force *= width_trust
 
       # do we want to mix in the model path a little bit if lanelines are going south?
       ultimate_path_mix = 0.0
       if not self.UseModelPath:
         ultimate_path_mix = lane_trust * interp(max_lane_width_seen, [4.0, 6.0], [1.0, 0.0])
+
+      # weaken center force based on path mix and width trust
+      self.center_force *= ultimate_path_mix * (1.0 + width_trust) * 0.5
 
       # max out at 80% model/lane system
       final_ultimate_path_mix = clamp(self.lane_change_multiplier * ultimate_path_mix, 0.0, 0.8)
